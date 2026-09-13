@@ -169,7 +169,7 @@ export const siteConfig: SiteConfig = {
   ogImage: {
     domain: 'polyflo.thally.app',
     logoText: 'Polyflo',
-    fontFamily: 'Unbounded',
+    fontFamily: 'Sora',
     fontWeight: '600',
   },
   brand: brandPresets[brandPreset],

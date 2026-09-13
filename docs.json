@@ -7,8 +7,8 @@
     "enabled": true
   },
   "fonts": {
-    "body": { "family": "Albert Sans", "weight": ["400", "500", "600", "700"] },
-    "heading": { "family": "Unbounded", "weight": ["500", "600", "700"] }
+    "body": { "family": "Noto Sans", "weight": ["400", "500", "600", "700"] },
+    "heading": { "family": "Sora", "weight": ["500", "600", "700"] }
   },
   "i18n": {
     "defaultLocale": "en",
