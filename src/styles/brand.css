@@ -1,35 +1,35 @@
 :root {
-  /* Light theme brand tokens — warm paper, green-tinted ink, lime + iris. */
-  --brand-light-background: 60 45% 98%;
+  /* Light theme — Settings UI (`src/styles/settings.css` in Polyflo). */
+  --brand-light-background: 45 17% 95%;
   --brand-light-card: 0 0% 100%;
-  --brand-light-foreground: 105 14% 11%;
-  --brand-light-muted: 60 16% 93%;
-  --brand-light-muted-foreground: 108 4% 46%;
-  --brand-light-border: 72 9% 89%;
-  --brand-light-accent: 161 100% 24%;
-  --brand-light-accent-foreground: 0 0% 100%;
-  --brand-light-accent-2: 254 40% 55%;
-  --brand-light-accent-2-foreground: 247 31% 6%;
-  --brand-light-input: 72 9% 89%;
-  --brand-light-sidebar: 60 26% 96%;
-  --brand-light-ring: 155 33% 33%;
-  --brand-sidebar-active-bg-light: 68 40% 88% / 0.65;
-  --brand-sidebar-active-text-light: 66 37% 21%;
+  --brand-light-foreground: 40 6% 10%;
+  --brand-light-muted: 45 21% 93%;
+  --brand-light-muted-foreground: 38 5% 52%;
+  --brand-light-border: 40 18% 90%;
+  --brand-light-accent: 45 5% 16%;
+  --brand-light-accent-foreground: 40 33% 98%;
+  --brand-light-accent-2: 151 68% 38%;
+  --brand-light-accent-2-foreground: 0 0% 100%;
+  --brand-light-input: 40 18% 90%;
+  --brand-light-sidebar: 45 17% 95%;
+  --brand-light-ring: 45 5% 16%;
+  --brand-sidebar-active-bg-light: 40 16% 93% / 0.9;
+  --brand-sidebar-active-text-light: 45 5% 16%;
 
-  /* Dark theme brand tokens — Ink + Iris, with lime for primary actions. */
-  --brand-dark-background: 120 27% 2%;
-  --brand-dark-card: 120 20% 3%;
-  --brand-dark-foreground: 60 20% 92%;
-  --brand-dark-muted: 132 15% 6%;
-  --brand-dark-muted-foreground: 110 6% 59%;
-  --brand-dark-border: 120 5% 11%;
-  --brand-dark-accent: 75 75% 57%;
-  --brand-dark-accent-foreground: 127 22% 8%;
-  --brand-dark-accent-2: 251 74% 78%;
-  --brand-dark-accent-2-foreground: 247 31% 6%;
-  --brand-dark-input: 129 8% 17%;
-  --brand-dark-sidebar: 120 20% 3%;
-  --brand-dark-ring: 75 75% 57%;
-  --brand-sidebar-active-bg-dark: 132 15% 6%;
-  --brand-sidebar-active-text-dark: 75 75% 57%;
+  /* Dark theme — overlay tokens (`src/styles/tokens.css` in Polyflo). */
+  --brand-dark-background: 0 0% 4%;
+  --brand-dark-card: 0 0% 8%;
+  --brand-dark-foreground: 0 0% 96%;
+  --brand-dark-muted: 0 0% 8%;
+  --brand-dark-muted-foreground: 0 0% 43%;
+  --brand-dark-border: 0 0% 10%;
+  --brand-dark-accent: 0 0% 100%;
+  --brand-dark-accent-foreground: 0 0% 4%;
+  --brand-dark-accent-2: 145 100% 75%;
+  --brand-dark-accent-2-foreground: 0 0% 4%;
+  --brand-dark-input: 0 0% 11%;
+  --brand-dark-sidebar: 0 0% 4%;
+  --brand-dark-ring: 0 0% 100%;
+  --brand-sidebar-active-bg-dark: 0 0% 100% / 0.12;
+  --brand-sidebar-active-text-dark: 0 0% 96%;
 }
