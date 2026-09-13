@@ -1,15 +1,29 @@
 ---
 title: Changelog
-description: Record product changes that alter how readers use the documented experience.
+description: Shipped Polyflo desktop releases — installers, dictation fixes, and settings behavior.
 ---
 
-## v0.1.0
+Installers are published on [GitHub Releases](https://github.com/Crisiswastaken/PolyFlo/releases). Tag a version on the product repo to cut a new draft release.
 
-The first published version of this documentation.
+<Update label="v1.0.2" date="2026-07-01">
 
-- A task-focused introduction and quickstart
-- Browsable API documentation generated from `openapi.yaml`
-- Agent-readable discovery files and a read-only MCP endpoint
+- Fix API key not persisting on Windows (Windows Credential Manager backend)
+- Fix hotkeys appearing dead when the API key was missing (notification instead of silence)
+- Fix duplicate password reveal icon in the API key field on Windows
 
-Replace this entry with changes your readers need to understand. Lead with the
-impact, then link to the guide or reference that explains the new behavior.
+</Update>
+
+<Update label="v1.0.1" date="2026-07-01">
+
+- Fix Settings stuck on “Loading…” in production builds (missing Tauri IPC permissions)
+- Fix Settings window not reopening after close (hide instead of destroy)
+- Fix API key save and verify persistence in the OS credential manager
+- Restore the hotkey after closing Settings or cancelling hotkey capture
+
+</Update>
+
+<Update label="v1.0.0" date="2026-07-01">
+
+First public release: tray dictation for Windows and macOS, Transcribe / Translate modes, overlay waveform, clipboard history, and Sarvam Saaras v3.
+
+</Update>

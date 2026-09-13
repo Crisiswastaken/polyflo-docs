@@ -1,45 +1,51 @@
 ---
-title: Introduction
-description: Give readers a clear path from their first question to a result they can verify.
+title: Polyflo
+description: Minimal push-to-talk dictation for Windows and macOS. Hold a hotkey, speak, and the text lands where your cursor is focused.
 mode: home
 ---
 
 <Hero
-  title="Build documentation around the reader"
-  subtitle="Start with a useful first result, organize what follows, and publish every format from one reviewable source."
-  primaryLabel="Get started"
+  title="Hold a hotkey. Speak. Text appears."
+  subtitle="Polyflo is a tray-based dictation app for Windows and macOS. It uses your Sarvam API key and Saaras v3, so Indic and code-mixed speech is a first-class path — not an afterthought."
+  primaryLabel="Install Polyflo"
   primaryHref="/quickstart"
-  secondaryLabel="Publish your docs"
-  secondaryHref="/guides/create-a-site"
+  secondaryLabel="How dictation works"
+  secondaryHref="/dictation"
 />
 
-## Build the reader journey
-
-Begin with the task that brings most readers to your documentation, then make
-the next useful step obvious.
+Polyflo stays out of the way. There is no account to create, no word cap, and no editor chrome. Open any app that accepts typed text, hold the hotkey, and release when you are done.
 
 <CardGroup cols="2">
-  <Card title="Write your quickstart" icon="party-horn" href="/quickstart">
-    Turn prerequisites, setup, one realistic task, and verification into a short path.
+  <Card title="Install in a minute" icon="party-horn" href="/quickstart">
+    Download a Windows or macOS installer, add a Sarvam API key, and dictate into any focused field.
   </Card>
-  <Card title="Organize your navigation" icon="grid-round" href="/customization">
-    Group related tasks and references around how people use your product.
+  <Card title="Transcribe or translate" icon="message" href="/dictation">
+    Paste speech as spoken, or send it through English translation before it lands.
   </Card>
-  <Card title="Document your API" icon="code-simple" href="/api">
-    Replace `openapi.yaml` to publish browsable endpoint docs with a live playground.
+  <Card title="23 languages" icon="grid-round" href="/languages">
+    Saaras v3 covers 22 Indian languages plus English, with automatic detection and code-mixing.
   </Card>
-  <Card title="Learn the Thally workflow" icon="wrench" href="/guides/create-a-site">
-    Create, publish, and update sites from the Cloud dashboard, the CLI, or your AI tools.
+  <Card title="Your key, your machine" icon="wrench" href="/api-key">
+    The Sarvam key stays in the OS credential manager. It only leaves your device when sent to Sarvam for transcription.
   </Card>
 </CardGroup>
 
-## Publish from one source
+## Who it is for
 
-Thally turns the same reviewed content into HTML, search, agent discovery files,
-Markdown mirrors, and a read-only MCP surface — so people and AI tools read the
-same, current answer. Add only the locales your readers need.
+Polyflo fits when you want a small, auditable tray app and pay-per-use speech-to-text instead of a subscription dictation suite.
 
-<Note type="info" title="Start with the product, not the template">
-  Replace this page with the questions, terminology, and workflows your readers
-  already use. Keep `docs.json` focused on the path between those tasks.
+- You dictate in **Indian languages** or mix them with English mid-sentence.
+- You want **no monthly plan** and transparent Sarvam billing.
+- You prefer an **open-source** desktop app you can build yourself.
+
+If you need AI cleanup, mobile apps, or cross-device snippets, see [Polyflo vs Wispr Flow](/compare).
+
+## What you need
+
+- Windows 10/11 or macOS 10.15+
+- A microphone
+- A [Sarvam API key](https://dashboard.sarvam.ai/)
+
+<Note type="tip" title="Next step">
+  [Install Polyflo](/quickstart), then add your API key the first time Settings opens.
 </Note>

@@ -1,3 +1,11 @@
+# Polyflo docs
+
+Documentation site for [Polyflo](https://github.com/Crisiswastaken/PolyFlo), published at [polyflo.thally.app](https://polyflo.thally.app).
+
+Pages live in `src/content/`. Navigation is `docs.json`. Brand and identity are in `src/data/site.ts`.
+
+---
+
 # Thally Starter
 
 A production-ready documentation site built with the open-source Thally runtime.

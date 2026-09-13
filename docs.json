@@ -1,10 +1,14 @@
 {
-  "theme": "default",
+  "theme": "sharp",
   "appearance": {
     "contentIcons": "accent"
   },
   "markdown": {
     "enabled": true
+  },
+  "fonts": {
+    "body": { "family": "Albert Sans", "weight": ["400", "500", "600", "700"] },
+    "heading": { "family": "Unbounded", "weight": ["500", "600", "700"] }
   },
   "i18n": {
     "defaultLocale": "en",
@@ -16,28 +20,65 @@
     ]
   },
   "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/Crisiswastaken/PolyFlo",
+        "type": "github"
+      }
+    ],
     "primary": {
-      "label": "Get started",
+      "label": "Install Polyflo",
       "href": "/quickstart"
     }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/Crisiswastaken/PolyFlo"
+    },
+    "links": [
+      {
+        "heading": "Product",
+        "items": [
+          { "label": "Overview", "href": "/" },
+          { "label": "Install", "href": "/quickstart" },
+          { "label": "Dictation", "href": "/dictation" },
+          { "label": "Changelog", "href": "/changelog" }
+        ]
+      },
+      {
+        "heading": "Setup",
+        "items": [
+          { "label": "API key", "href": "/api-key" },
+          { "label": "Settings", "href": "/settings" },
+          { "label": "Languages", "href": "/languages" },
+          { "label": "Troubleshooting", "href": "/troubleshooting" }
+        ]
+      },
+      {
+        "heading": "Developers",
+        "items": [
+          { "label": "Build from source", "href": "/build-from-source" },
+          { "label": "Architecture", "href": "/architecture" },
+          { "label": "GitHub", "href": "https://github.com/Crisiswastaken/PolyFlo" },
+          { "label": "Releases", "href": "https://github.com/Crisiswastaken/PolyFlo/releases" }
+        ]
+      }
+    ]
   },
   "tabs": [
     {
       "tab": "Get started",
       "groups": [
         {
-          "group": "Get started",
-          "pages": [
-            "introduction",
-            "quickstart"
-          ]
+          "group": "Start here",
+          "icon": "book-open",
+          "pages": ["introduction", "quickstart", "dictation"]
         },
         {
-          "group": "Design your docs",
-          "pages": [
-            "components",
-            "customization"
-          ]
+          "group": "Set up",
+          "icon": "wrench",
+          "pages": ["api-key", "settings", "languages"]
         }
       ]
     },
@@ -45,29 +86,16 @@
       "tab": "Guides",
       "groups": [
         {
-          "group": "Work with Thally",
-          "pages": [
-            "guides/create-a-site",
-            "guides/work-with-the-cli",
-            "guides/connect-ai-tools"
-          ]
+          "group": "Using Polyflo",
+          "icon": "message",
+          "pages": ["troubleshooting", "compare"]
+        },
+        {
+          "group": "Developers",
+          "icon": "code-simple",
+          "pages": ["build-from-source", "architecture"]
         }
       ]
-    },
-    {
-      "tab": "API Reference",
-      "groups": [
-        {
-          "group": "Overview",
-          "pages": [
-            "api/introduction",
-            "api/authentication"
-          ]
-        }
-      ],
-      "api": {
-        "source": "openapi.yaml"
-      }
     },
     {
       "tab": "Changelog",
@@ -75,6 +103,19 @@
     }
   ],
   "ai": {
-    "chat": true
+    "chat": true,
+    "label": "Ask Polyflo",
+    "systemPrompt": "Answer from Polyflo documentation. Polyflo is a desktop push-to-talk dictation app for Windows and macOS that uses a Sarvam API key. Prefer concise answers with links to the matching guide."
+  },
+  "tracking": {
+    "repos": [
+      {
+        "owner": "Crisiswastaken",
+        "repo": "PolyFlo",
+        "branch": "main",
+        "outputTab": "Guides",
+        "outputGroup": "Using Polyflo"
+      }
+    ]
   }
 }

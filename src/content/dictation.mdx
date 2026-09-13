@@ -1,0 +1,61 @@
+---
+title: How dictation works
+navTitle: Dictation
+description: Hold the hotkey to listen, speak, and paste a transcript into the focused field — or copy it if paste is blocked.
+---
+
+Polyflo is push-to-talk. Nothing is recorded until you hold the hotkey, and processing starts only when you release it.
+
+## The loop
+
+<Steps>
+  <Step title="Focus a text field">
+    Click into any application that accepts typed text. Polyflo remembers that window so it can return focus after transcription.
+  </Step>
+  <Step title="Hold the hotkey">
+    Default shortcuts:
+
+    - Windows: `Ctrl+Shift+Space`
+    - macOS: `Cmd+Shift+Space`
+
+    Change them in [Settings](/settings). Holds shorter than about 180 ms are ignored so accidental taps do not start a session.
+  </Step>
+  <Step title="Speak">
+    A circular overlay appears and shows a live waveform while you talk. Keep holding the hotkey until you finish the phrase.
+  </Step>
+  <Step title="Release">
+    The overlay switches to processing. Polyflo sends the recording to Sarvam, then pastes the result into the original field.
+  </Step>
+</Steps>
+
+<Note type="info" title="No API key">
+  If the Sarvam key is missing, dictation does not start. Settings opens (or a notification appears) so you can add one. See [API key](/api-key).
+</Note>
+
+## Modes
+
+Choose a mode at the top of Settings. It applies to the next dictation.
+
+| Mode | Label in Settings | Result |
+| --- | --- | --- |
+| **Transcribe** | Transcribe | Speech is recognized with automatic language detection and pasted as spoken. |
+| **Translate** | Translate | Speech is transcribed and translated to English, then pasted. |
+
+Transcribe uses Saaras v3 `transcribe` mode. Translate tries Saaras `translate` mode first, then falls back to transcription plus Sarvam Translate if needed.
+
+## What happens to the text
+
+1. The transcript is written to the system clipboard.
+2. If this platform can simulate paste, Polyflo restores the original window and sends paste (`Ctrl+V` / `Cmd+V`).
+3. If paste is unavailable or fails, the text stays on the clipboard and a notification tells you to paste it yourself.
+4. The transcript is stored in Settings → **Clipboard** (up to 50 recent entries).
+
+## Overlay states
+
+| State | What you see |
+| --- | --- |
+| Idle | No overlay (or a tiny idle marker) |
+| Listening | Expanded circle with a live audio waveform |
+| Processing | Spinner while Sarvam returns a transcript |
+
+The overlay stays above other windows and does not steal keyboard focus.

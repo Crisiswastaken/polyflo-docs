@@ -90,44 +90,41 @@ export interface SiteConfig {
 }
 
 const brandPresets: Record<BrandPresetKey, BrandConfig> = {
-  // A warm neutral foundation with restrained green and violet accents.
+  // Matches Polyflo's tray app: near-black surfaces, mint success accent.
   primary: {
     light: {
-      background: '#FCFCF7',
-      // The docs handoff uses the page surface for cards; hierarchy comes from
-      // hairline borders rather than white tiles or elevation.
-      card: '#FCFCF7',
-      foreground: '#1A2018',
-      muted: '#EFEFE9',
-      mutedForeground: '#747B72',
-      border: '#E5E6E1',
-      accent: '#007852',
+      background: '#FAFAFA',
+      card: '#FAFAFA',
+      foreground: '#0A0A0A',
+      muted: '#F0F0F0',
+      mutedForeground: '#6B6B6B',
+      border: '#E5E5E5',
+      accent: '#0A0A0A',
       accentForeground: '#FFFFFF',
-      accent2: '#755FBB',
-      accent2Foreground: '#0B0A13',
-      input: '#E5E6E1',
-      sidebar: '#F7F7F2',
-      ring: '#397059',
-      // Olive-family tint (the leaf's own green) for the active sidebar item
-      sidebarActiveBg: '68 40% 88% / 0.65',
-      sidebarActiveText: '#454A22',
+      accent2: '#0F766E',
+      accent2Foreground: '#FFFFFF',
+      input: '#E5E5E5',
+      sidebar: '#F5F5F5',
+      ring: '#0A0A0A',
+      sidebarActiveBg: '0 0% 90% / 0.7',
+      sidebarActiveText: '#0A0A0A',
     },
     dark: {
-      background: '#040704',
-      card: '#060906',
-      foreground: '#EFEFE7',
-      muted: '#0E130F',
-      mutedForeground: '#929C90',
-      border: '#1B1E1A',
-      accent: '#BAE43E',
-      accentForeground: '#101911',
-      accent2: '#AC9CF0',
-      accent2Foreground: '#0B0A13',
-      input: '#29302A',
-      sidebar: '#060906',
-      ring: '#BAE43E',
-      sidebarActiveBg: '132 15% 6%',
-      sidebarActiveText: '#BAE43E',
+      background: '#0A0A0A',
+      card: '#141414',
+      foreground: '#F5F5F5',
+      muted: '#141414',
+      mutedForeground: '#8A8A8A',
+      border: '#262626',
+      accent: '#7DFFB3',
+      accentForeground: '#0A0A0A',
+      accent2: '#FFFFFF',
+      accent2Foreground: '#0A0A0A',
+      input: '#1C1C1C',
+      sidebar: '#0A0A0A',
+      ring: '#7DFFB3',
+      sidebarActiveBg: '0 0% 12%',
+      sidebarActiveText: '#7DFFB3',
     },
   },
   // Alternate preset — violet. Still a first-class, ready-to-use accent.
@@ -160,14 +157,21 @@ const brandPresets: Record<BrandPresetKey, BrandConfig> = {
 const brandPreset: BrandPresetKey = 'primary'
 
 export const siteConfig: SiteConfig = {
-  name: 'Polyflo Docs',
+  name: 'Polyflo',
   description:
-    'Documentation for Polyflo Docs.',
-  repoUrl: '',
+    'Minimal push-to-talk dictation for Windows and macOS. Hold a hotkey, speak, release — text appears wherever your cursor is focused.',
+  repoUrl: 'https://github.com/Crisiswastaken/polyflo-docs',
   links: [
-    { label: 'Get started', href: '/quickstart' },
+    { label: 'Install Polyflo', href: '/quickstart' },
+    { label: 'GitHub', href: 'https://github.com/Crisiswastaken/PolyFlo' },
     { label: 'Changelog', href: '/changelog' },
   ],
+  ogImage: {
+    domain: 'polyflo.thally.app',
+    logoText: 'Polyflo',
+    fontFamily: 'Unbounded',
+    fontWeight: '600',
+  },
   brand: brandPresets[brandPreset],
   brandPreset,
   brandPresets,

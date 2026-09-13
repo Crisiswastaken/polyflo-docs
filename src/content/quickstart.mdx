@@ -1,47 +1,63 @@
 ---
-title: Quickstart
-description: Guide a new reader through one useful workflow and show them how to verify it.
+title: Install Polyflo
+navTitle: Install
+description: Download Polyflo for Windows or macOS, add a Sarvam API key, and complete your first dictation.
 ---
 
-A strong quickstart produces one meaningful result. Replace the placeholders
-below with the shortest supported path for your product.
+The shortest path is a GitHub release installer. After install, Polyflo lives in the system tray — there is no always-on window.
 
 ## Before you begin
 
-List only the requirements needed for this workflow:
-
-- An account or credential, when required
-- A supported runtime, device, browser, or operating system
-- Permission to create or change the resource used in the example
+- **Windows:** Windows 10 or 11 with WebView2 (pre-installed on current Windows)
+- **macOS:** macOS 10.15 or later
+- A [Sarvam API key](https://dashboard.sarvam.ai/). Sarvam offers [trial credits](https://www.sarvam.ai/voice-to-text); speech-to-text is billed per second.
 
 <Steps>
-  <Step title="Install the required tool">
-    Give readers one recommended installation command.
+  <Step title="Download the installer">
+    Open the latest [GitHub release](https://github.com/Crisiswastaken/PolyFlo/releases) and choose your platform:
 
-    ```bash
-    npm install your-package
-    ```
+    - **Windows:** `Polyflo_*_x64-setup.exe` (NSIS installer)
+    - **macOS (Apple Silicon):** `Polyflo_*_aarch64.dmg`
+    - **macOS (Intel):** `Polyflo_*_x64.dmg`
   </Step>
-  <Step title="Add the minimum configuration">
-    Include only the values needed for the first successful run.
+  <Step title="Install and launch">
+    <Tabs>
+      <Tab title="Windows">
+        Run the `.exe` installer. Launch Polyflo from the Start menu. It appears in the **system tray**.
+      </Tab>
+      <Tab title="macOS">
+        Open the `.dmg` and drag Polyflo into Applications. Launch it from Applications or Spotlight. It appears in the **menu bar**.
 
-    ```bash
-    your-cli init
-    ```
+        Grant **Accessibility** when macOS asks, so Polyflo can paste into other apps. You can also enable it later in System Settings → Privacy & Security → Accessibility.
+      </Tab>
+    </Tabs>
   </Step>
-  <Step title="Complete the first task">
-    Use a realistic example that produces an observable result.
+  <Step title="Add your Sarvam API key">
+    If no key is saved, Settings opens automatically. Paste the key into **API Key** and leave the field — Polyflo saves it to the OS credential manager.
 
-    ```bash
-    your-cli start
-    ```
+    The helper text should read **Saved locally — verified**. Details are in [API key](/api-key).
   </Step>
-  <Step title="Verify the result">
-    State exactly what the reader should see and how to recover when it does not appear.
+  <Step title="Dictate once">
+    Click into any text field. Hold the default hotkey, speak a short sentence, then release:
+
+    - Windows: `Ctrl+Shift+Space`
+    - macOS: `Cmd+Shift+Space`
+
+    A small overlay shows listening, then processing. The transcript should paste into the focused field.
   </Step>
 </Steps>
 
-## Choose the next task
+## If paste does not happen
 
-Link to the guide that naturally follows this result. Avoid ending the reader’s
-journey with a generic list of every feature.
+Polyflo always writes the transcript to the clipboard first. If auto-paste is blocked, it shows a notification so you can paste with `Ctrl+V` / `Cmd+V`. See [Troubleshooting](/troubleshooting).
+
+## Next
+
+<CardGroup cols="2">
+  <Card title="How dictation works" icon="message" href="/dictation">
+    Modes, overlay states, and what happens on release.
+  </Card>
+  <Card title="Change the hotkey" icon="wrench" href="/settings">
+    Capture a new shortcut, switch Transcribe/Translate, and reopen history.
+  </Card>
+</CardGroup>

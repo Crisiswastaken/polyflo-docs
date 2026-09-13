@@ -1,0 +1,51 @@
+---
+title: Settings
+description: Change dictation mode, the hold-to-talk hotkey, your API key, and reopen recent transcripts.
+---
+
+Settings is a small window, not a website. Open it from the tray / menu-bar icon → **Open Settings**. Quit the app from the same menu.
+
+## Mode
+
+The segmented control at the top switches the next dictation:
+
+- **Transcribe** — paste speech as spoken
+- **Translate** — paste English
+
+The choice is saved immediately. See [How dictation works](/dictation).
+
+## Clipboard
+
+**Clipboard** lists recent transcripts, newest first. Polyflo keeps up to **50** entries on disk in the app data directory (`history.json`).
+
+- Click a row to open the full transcript.
+- Use the copy button on a row or in the modal to copy without dictating again.
+- Empty state: **No transcripts yet**.
+
+History is local to this machine. It is not synced across devices.
+
+## Hotkey
+
+The default hold-to-talk shortcut is `Ctrl+Shift+Space` on Windows and `Cmd+Shift+Space` on macOS.
+
+<Steps>
+  <Step title="Click Change">
+    Polyflo pauses the current hotkey so the next chord is not treated as dictation. The keycaps show **Press keys…**
+  </Step>
+  <Step title="Hold the combination you want">
+    Include at least one modifier (`Ctrl`, `Cmd`, `Alt`, or `Shift`) plus a key. The new shortcut is saved as soon as it is recognized.
+  </Step>
+  <Step title="Cancel if needed">
+    Click **Cancel**, press `Escape`, or wait about 10 seconds. The previous hotkey is restored.
+  </Step>
+</Steps>
+
+If registration fails, an error appears under the keycaps (for example when another app already owns that shortcut). Pick a different combination.
+
+## API Key
+
+The **API Key** field stores your Sarvam credential in the OS keychain. Details: [API key](/api-key).
+
+## Closing Settings
+
+Closing the window hides it; it does not quit Polyflo. The tray / menu-bar icon stays running so the hotkey keeps working.

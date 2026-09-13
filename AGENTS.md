@@ -60,4 +60,19 @@ upgrade an existing site or move a production release pointer.
 
 ## Product context
 
-<!-- Add canonical terminology, audience details, and content boundaries here. -->
+Polyflo is a lightweight desktop dictation app for Windows and macOS. It lives
+in the system tray. The user holds a hotkey, speaks, and releases; transcribed
+text is pasted into the focused field.
+
+Canonical terms:
+
+- **Polyflo** (product name; not PolyFlo in user-facing copy except GitHub URLs)
+- **Transcribe** mode: speech is pasted as spoken, with automatic language detection
+- **Translate** mode: speech is transcribed and translated to English before paste
+- **Sarvam API key**: required credential, stored in the OS credential manager
+- **Clipboard**: Settings history of recent transcripts (up to 50)
+
+Do not document Wispr Flow features as Polyflo features. Do not claim WebSocket
+STT; the app posts WAV audio to Sarvam's speech-to-text HTTP API using
+`saaras:v3`. The product repository is `Crisiswastaken/PolyFlo`. This
+documentation repository is `Crisiswastaken/polyflo-docs`.

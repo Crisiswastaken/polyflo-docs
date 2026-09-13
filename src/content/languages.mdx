@@ -1,0 +1,39 @@
+---
+title: Languages
+description: Polyflo uses Sarvam Saaras v3 — 22 Indian languages plus English, with automatic detection and code-mixing.
+---
+
+You do not pick a language before you speak. In **Transcribe** mode, Saaras v3 detects the language (including mixed utterances) and returns text in the script it heard.
+
+**Translate** mode still accepts those languages as input and pastes **English**.
+
+## Supported languages
+
+Saaras v3 covers 23 languages (22 Indian + English):
+
+| Language | Code | Language | Code |
+| --- | --- | --- | --- |
+| Hindi | `hi-IN` | Assamese | `as-IN` |
+| Bengali | `bn-IN` | Urdu | `ur-IN` |
+| Kannada | `kn-IN` | Nepali | `ne-IN` |
+| Malayalam | `ml-IN` | Konkani | `kok-IN` |
+| Marathi | `mr-IN` | Kashmiri | `ks-IN` |
+| Odia | `od-IN` | Sindhi | `sd-IN` |
+| Punjabi | `pa-IN` | Sanskrit | `sa-IN` |
+| Tamil | `ta-IN` | Santali | `sat-IN` |
+| Telugu | `te-IN` | Manipuri | `mni-IN` |
+| English | `en-IN` | Bodo | `brx-IN` |
+| Gujarati | `gu-IN` | Maithili | `mai-IN` |
+| | | Dogri | `doi-IN` |
+
+Source: [Sarvam model language tables](https://docs.sarvam.ai/api-reference-docs/getting-started/models).
+
+## Code-mixing
+
+Saaras v3 is built for mixed speech (for example Hindi + English in one sentence). Speak the way you normally would; you do not need a separate “Hindi mode.”
+
+## What Polyflo does not do
+
+- It does not expose Saaras `verbatim`, `translit`, or `codemix` output modes in Settings — only Transcribe and Translate.
+- It does not let you force a `language_code`. Requests send `unknown` so the model auto-detects.
+- It does not add AI punctuation cleanup or a custom dictionary. The pasted text is the model transcript (or its English translation).

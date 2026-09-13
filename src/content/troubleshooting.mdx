@@ -1,0 +1,50 @@
+---
+title: Troubleshooting
+description: Fix missing paste, dead hotkeys, API key save failures, and macOS Accessibility prompts.
+---
+
+Work through the matching symptom. If dictation still fails, check the tray notification — Polyflo reports missing keys and paste fallbacks there.
+
+## Nothing happens when I hold the hotkey
+
+- Confirm Polyflo is running in the tray / menu bar (not only Settings open once and quit).
+- Confirm a [Sarvam API key](/api-key) is saved. Without a key, v1.0.2 shows a notification instead of a silent miss.
+- Try a different shortcut in [Settings](/settings) if another app owns `Ctrl+Shift+Space` / `Cmd+Shift+Space`.
+- Speak for more than a brief tap. Holds under about 180 ms are ignored, and very short audio is not sent to Sarvam.
+
+## The overlay appears, then no text is inserted
+
+Polyflo writes the clipboard **before** simulating paste.
+
+1. Try `Ctrl+V` (Windows) or `Cmd+V` (macOS). If the transcript appears, auto-paste was blocked.
+2. On **macOS**, enable Polyflo in System Settings → Privacy & Security → **Accessibility**, then try again.
+3. Click back into the target field before releasing the hotkey so focus restore has a window to return to.
+4. Open Settings → **Clipboard** — the transcript is stored even when paste fails.
+
+## Settings stuck on Loading
+
+This was a production bug in early 1.0 builds (missing Tauri IPC permissions). Install [v1.0.2 or later](https://github.com/Crisiswastaken/PolyFlo/releases).
+
+If Settings still fails to load, use **Retry** on the error screen.
+
+## API key will not save on Windows
+
+v1.0.2 enabled the Windows Credential Manager backend. Update if you are on an older build. After updating, paste the key again and blur the field until you see **Saved locally — verified**.
+
+## Duplicate eye icon on the API key field
+
+Fixed in v1.0.2. Update if you still see two reveal buttons.
+
+## Settings will not reopen after I close it
+
+Fixed in v1.0.1 — closing Settings hides the window instead of destroying it. Update if the tray **Open Settings** item does nothing.
+
+## Microphone is silent / empty transcripts
+
+- Allow microphone access when the OS prompts. On macOS the app explains that it needs the mic to transcribe speech.
+- Confirm the correct input device is selected in OS sound settings. Polyflo uses the system default capture device.
+- Check that you held the hotkey long enough to capture audio (a waveform should move in the overlay).
+
+## Build from source fails on Windows
+
+Build with **PowerShell or CMD**, not Git Bash. Git Bash can conflict with MSVC `link.exe`. See [Build from source](/build-from-source).

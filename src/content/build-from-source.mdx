@@ -1,0 +1,65 @@
+---
+title: Build from source
+description: Clone Polyflo, install Node and Rust, then run the Tauri app in development or produce installers.
+---
+
+Use this path when you want to audit the code or produce your own installers. For daily use, prefer a [release installer](/quickstart).
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) 18 or later
+- [Rust](https://www.rust-lang.org/tools/install) 1.77 or later
+- [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS
+
+<Tabs>
+  <Tab title="Windows">
+    - WebView2 (included on Windows 10/11)
+    - Microphone access
+    - Build with **PowerShell or CMD** — not Git Bash (MSVC `link.exe` conflict)
+  </Tab>
+  <Tab title="macOS">
+    - Xcode Command Line Tools
+    - **Accessibility** permission for auto-paste (System Settings → Privacy & Security → Accessibility)
+  </Tab>
+</Tabs>
+
+## Install and run
+
+```bash
+git clone https://github.com/Crisiswastaken/PolyFlo.git
+cd PolyFlo
+npm install
+```
+
+Optional for local dev only: copy `.env.example` to `.env` and set `SARVAM_API_KEY`. Production builds store the key in the OS credential manager via Settings.
+
+```bash
+# Development
+npm run tauri:dev
+
+# Production installers
+npm run tauri:build
+```
+
+Installers are written to `src-tauri/target/release/bundle/`.
+
+Windows helper scripts live in [`scripts/`](https://github.com/Crisiswastaken/PolyFlo/tree/main/scripts):
+
+- `install-windows-sdk.ps1` — Windows SDK setup
+- `setup-msvc.ps1` — MSVC toolchain setup
+- `run-dev.ps1` — convenience launcher
+
+## Publish a GitHub release
+
+Tag a version to trigger the release workflow:
+
+```bash
+git tag v1.0.3
+git push origin v1.0.3
+```
+
+GitHub Actions builds Windows and macOS installers and opens a **draft** release for you to review and publish.
+
+## Next
+
+Read [Architecture](/architecture) for the capture → Sarvam → paste path.

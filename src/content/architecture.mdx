@@ -1,0 +1,38 @@
+---
+title: Architecture
+description: How Polyflo captures microphone audio, calls Sarvam, and pastes a transcript into the focused app.
+---
+
+Polyflo is a [Tauri v2](https://v2.tauri.app/) desktop app: a small React UI (Settings + overlay) on a Rust backend. The product identifier is `com.polyflo.app`.
+
+## Request path
+
+1. **Hotkey** — a global shortcut starts a session while held (`Ctrl+Shift+Space` / `Cmd+Shift+Space` by default).
+2. **Focus** — Polyflo records the foreground window so it can restore it after transcription.
+3. **Capture** — [cpal](https://github.com/RustAudio/cpal) records the default microphone, resampled to **16 kHz mono PCM**.
+4. **Overlay** — an always-on-top circle shows a live waveform, then a spinner.
+5. **Speech-to-text** — the PCM is wrapped as WAV and posted to `https://api.sarvam.ai/speech-to-text` with model `saaras:v3`.
+6. **Optional translation** — Translate mode prefers Saaras `translate`, then Sarvam Translate (`sarvam-translate:v1`) if needed.
+7. **Inject** — the transcript is written to the clipboard with `arboard`. If paste simulation is reliable, [enigo](https://github.com/enigo-rs/enigo) sends paste; otherwise a notification tells you to paste manually.
+8. **History** — up to 50 transcripts are stored in the app data directory as `history.json`.
+
+Holds shorter than ~180 ms, or buffers under ~180 ms of audio, never reach the API.
+
+## Settings vs overlay
+
+| Window | Role |
+| --- | --- |
+| Settings | Mode, clipboard history, hotkey capture, API key |
+| Overlay | Listening / processing indicator only — no keyboard focus |
+
+Both windows are created at launch. Settings is hidden until you open it; the overlay stays tiny until a session starts.
+
+## Secrets
+
+The Sarvam key lives in the OS credential manager (service `polyflo`, account `sarvam`). `SARVAM_API_KEY` is a development fallback. See [API key](/api-key).
+
+## What this is not
+
+Polyflo has no cloud account, no sync, and no server of its own. The only network calls are to Sarvam (`api.sarvam.ai`). There is no offline recognition path.
+
+The public GitHub README previously described WebSocket STT. The current backend uses the HTTP speech-to-text API above.

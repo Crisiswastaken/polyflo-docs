@@ -1,0 +1,44 @@
+---
+title: Sarvam API key
+navTitle: API key
+description: Create a Sarvam API key, save it in Polyflo Settings, and understand where it is stored.
+---
+
+Polyflo does not ship with speech-to-text credits of its own. Every dictation call uses **your** [Sarvam](https://www.sarvam.ai/) key against Saaras v3.
+
+## Add a key
+
+<Steps>
+  <Step title="Create a Sarvam key">
+    Sign in at the [Sarvam dashboard](https://dashboard.sarvam.ai/) and create an API key. Sarvam publishes [trial credits](https://www.sarvam.ai/voice-to-text) and [speech-to-text pricing](https://docs.sarvam.ai/api-reference-docs/pricing) (billed per second).
+  </Step>
+  <Step title="Open Polyflo Settings">
+    Right-click the tray icon (Windows) or menu-bar icon (macOS) and choose **Open Settings**. If no key is stored, Settings opens on first launch.
+  </Step>
+  <Step title="Paste and leave the field">
+    Paste the key into **API Key**. Click away or press Enter. Polyflo saves it locally and the helper text changes to **Saved locally — verified**.
+  </Step>
+</Steps>
+
+Use the eye button to reveal a saved key. The field shows a placeholder until you choose to reveal or replace it.
+
+## Where the key is stored
+
+The key is written to the OS credential manager:
+
+- Service: `polyflo`
+- Account: `sarvam`
+
+It is not written to git, Settings JSON, or Polyflo's history file. The only time it leaves your machine is as the `api-subscription-key` header on requests to `api.sarvam.ai`.
+
+During local development you can also set `SARVAM_API_KEY` in a `.env` file copied from `.env.example`. Production builds still prefer the credential manager via Settings.
+
+<Note type="warning" title="Never commit a real key">
+  Do not put a live Sarvam key in source control, screenshots of Settings, or public issue reports.
+</Note>
+
+## Replace a key
+
+Paste a new value into **API Key** and blur the field. The previous credential is overwritten in the credential manager.
+
+If save fails on Windows, see [Troubleshooting](/troubleshooting) — v1.0.2 enabled the Windows Credential Manager backend for this exact case.
