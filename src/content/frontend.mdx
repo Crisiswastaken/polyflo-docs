@@ -1,0 +1,87 @@
+---
+title: Frontend
+description: Settings and overlay webviews — Vite entries, Tauri invoke, hotkey capture, and overlay animation.
+---
+
+The UI is React 19 + Vite 7. It does not render dictation itself. Rust owns capture, STT, and paste. The webviews display state and write settings.
+
+## Two bundles
+
+`vite.config.ts` `rollupOptions.input`:
+
+- `index.html` → Settings (`src/main.tsx`)
+- `overlay.html` → Overlay (`src/overlay-main.tsx`)
+
+Dev server: `http://localhost:1420`, HMR websocket 1421 when `TAURI_DEV_HOST` is set.
+
+`overlay-main.tsx` forces a transparent `html`/`body` and adds `overlay-page` so CSS tokens do not paint an opaque window.
+
+## Settings (`Settings.tsx`)
+
+On mount:
+
+```ts
+invoke("get_settings")
+invoke("get_api_key_set")
+invoke("get_hotkey_status")
+invoke("get_clipboard_history")
+```
+
+Listeners:
+
+- `hotkey-status` — registration errors
+- `clipboard-history-updated` — prepend a new history row
+- window `onFocusChanged` — reload so an API key saved elsewhere shows up
+
+### Mode
+
+Buttons call `save_settings` with `dictationMode: "native" | "english"`. Rust stores `native` / `english`. Do not send `"transcribe"` on this field.
+
+### Hotkey capture
+
+<Steps>
+  <Step title="pause_hotkey">
+    Unregister the global shortcut so the capture keystrokes are not a dictation session.
+  </Step>
+  <Step title="Listen on the focused Settings window">
+    `keyEventToHotkey` in `src/utils/hotkey.ts` builds `Ctrl+Shift+Space`-style strings (`Cmd` on macOS).
+  </Step>
+  <Step title="save_settings">
+    Backend re-registers via `register_hotkey_internal`.
+  </Step>
+  <Step title="Timeout / cancel">
+    10 s timeout or Escape calls `resume_hotkey` with the previous combo.
+  </Step>
+</Steps>
+
+Closing Settings also calls `ensure_hotkey_registered` from `lib.rs` so a cancelled capture cannot leave the app deaf.
+
+### API key field
+
+- `set_api_key` / `clear_api_key` / `get_api_key` (reveal)
+- Placeholder `sk-••••…` when a key exists and the field is not dirty
+- Windows: avoid a second native password-reveal icon (v1.0.2)
+
+Never log the key. Never put it in `settings.json`.
+
+## Overlay (`Overlay.tsx`)
+
+Local state: `idle | listening | processing | injecting` and `level: number`.
+
+- `listening` → `AudioWave`
+- `processing` or `injecting` → `OverlayLoader`
+- `idle` → tiny sphere, level reset to 0
+
+No `invoke` from overlay. If you add one, you must still list the command in `app-commands.toml` (both windows share the `default` capability).
+
+## Styling
+
+- `src/styles/tokens.css` — color tokens (`#0a0a0a`, `#f5f5f5`, `#7dffb3`)
+- `src/styles/settings.css` — Settings layout
+- Overlay sphere classes `vox-sphere--listening` / `--processing` / `--idle`
+
+Fonts in the app (Unbounded / Albert Sans) are loaded for the webviews; keep them if you rebrand unless you replace `tokens.css`.
+
+## Types
+
+`src/types.ts` is the contract. If you add a field to `AppSettings` in Rust, add it here with the same camelCase name or Settings will silently drop it at runtime.

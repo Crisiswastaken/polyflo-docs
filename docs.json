@@ -58,10 +58,10 @@
       {
         "heading": "Developers",
         "items": [
-          { "label": "Build from source", "href": "/build-from-source" },
+          { "label": "Contributing", "href": "/contributing" },
           { "label": "Architecture", "href": "/architecture" },
-          { "label": "GitHub", "href": "https://github.com/Crisiswastaken/PolyFlo" },
-          { "label": "Releases", "href": "https://github.com/Crisiswastaken/PolyFlo/releases" }
+          { "label": "Fork and rebrand", "href": "/forking" },
+          { "label": "GitHub", "href": "https://github.com/Crisiswastaken/PolyFlo" }
         ]
       }
     ]
@@ -93,7 +93,36 @@
         {
           "group": "Developers",
           "icon": "code-simple",
-          "pages": ["build-from-source", "architecture"]
+          "pages": ["build-from-source"]
+        }
+      ]
+    },
+    {
+      "tab": "Contribute",
+      "groups": [
+        {
+          "group": "Get involved",
+          "icon": "git-branch",
+          "pages": ["contributing", "development", "repository-layout"]
+        },
+        {
+          "group": "Internals",
+          "icon": "code-simple",
+          "pages": [
+            "architecture",
+            "session",
+            "audio",
+            "speech-to-text",
+            "injection",
+            "frontend",
+            "ipc",
+            "data-and-secrets"
+          ]
+        },
+        {
+          "group": "Ship your own",
+          "icon": "box",
+          "pages": ["forking", "adding-features", "testing", "releases"]
         }
       ]
     },
@@ -105,7 +134,7 @@
   "ai": {
     "chat": true,
     "label": "Ask Polyflo",
-    "systemPrompt": "Answer from Polyflo documentation. Polyflo is a desktop push-to-talk dictation app for Windows and macOS that uses a Sarvam API key. Prefer concise answers with links to the matching guide."
+    "systemPrompt": "Answer from Polyflo documentation. Polyflo is an open-source desktop push-to-talk dictation app (Tauri v2 + Rust + React) for Windows and macOS that uses a Sarvam API key and HTTP Saaras v3 STT — not WebSocket. For install and daily use, prefer Get started. For contributors and forks, prefer Contribute: repository layout, session lifecycle, audio, STT, injection, IPC allow-lists, testing, and releases. Cite page URLs."
   },
   "tracking": {
     "repos": [

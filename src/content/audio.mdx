@@ -1,0 +1,70 @@
+---
+title: Audio pipeline
+description: How Polyflo captures the default microphone, resamples to 16 kHz mono PCM, meters the overlay, and wraps WAV for Sarvam.
+---
+
+Capture is local and short-lived. Audio exists in memory for one session, then is posted as a WAV file. Polyflo does not write recordings to disk.
+
+Sources: [`audio/capture.rs`](https://github.com/Crisiswastaken/PolyFlo/blob/main/src-tauri/src/audio/capture.rs), [`resample.rs`](https://github.com/Crisiswastaken/PolyFlo/blob/main/src-tauri/src/audio/resample.rs), [`wav.rs`](https://github.com/Crisiswastaken/PolyFlo/blob/main/src-tauri/src/audio/wav.rs).
+
+## Target format
+
+Sarvam receives:
+
+- Container: WAV (`RIFF` / `WAVE` / `fmt ` / `data`)
+- Channels: 1 (mono)
+- Sample rate: **16_000 Hz** (`TARGET_SAMPLE_RATE`)
+- Sample format: 16-bit little-endian PCM
+
+The WAV header is built in `pcm_to_wav` (44-byte canonical header, PCM format tag `1`).
+
+## Capture thread
+
+cpal’s `Stream` is `!Send`, so `AudioCaptureGuard` owns a dedicated OS thread:
+
+1. `cpal::default_host().default_input_device()`
+2. Device default input config (rate, channels, `I16` / `F32` / `U16`)
+3. Input callback: mix channels to mono `f32`, resample if needed, push `i16` into `AudioBuffer`
+4. Loop `sleep(50 ms)` until `stop` is set
+5. On `Drop`, set `stop` and `join` the thread
+
+If there is no input device, `start()` returns `"No input device available"` and the session never enters listening.
+
+## Resampling
+
+`resample_to_16k` is nearest-neighbor (index by `i * in_rate / 16000`). It is small and dependency-free. It is **not** a high-quality SRC. If you fork for music or wide-band ASR, replace this module first.
+
+When the device already runs at 16 kHz, samples convert directly `f32 → i16` with clamp.
+
+## Metering
+
+While listening, a Tokio task every **16 ms** emits `audio-level` (`f32` 0..=1).
+
+`peak_level()` uses samples **since the last read** (a cursor into the buffer) so the overlay tracks live speech, not the whole utterance RMS.
+
+The blend is `peak * 0.35 + rms * 0.65`, then `(raw * 9.0).powf(0.55)`. `Overlay` / `AudioWave` consume that number.
+
+## Accidental-press gate
+
+After stop, PCM is drained as raw little-endian bytes (`i16` → two bytes each).
+
+`MIN_PCM_BYTES = 5760` → 2880 samples → 2880 / 16000 ≈ **180 ms**. Combined with `MIN_LISTEN_MS = 180`, short taps never call Sarvam (saves quota and avoids empty-transcript toasts).
+
+## Mic test
+
+Settings can call `test_mic` (`commands.rs` → `capture::test_mic(500)`). It starts capture for 500 ms and returns whether more than 320 bytes arrived. It does not hit the network.
+
+## Changing the pipeline
+
+Typical forks:
+
+| Goal | Touch |
+| --- | --- |
+| Different sample rate | `TARGET_SAMPLE_RATE`, WAV header, STT docs |
+| Stereo / specific device | `run_capture_loop` device selection (currently default only) |
+| Push-to-talk streaming | Replace drain-then-POST with a streaming client — the HTTP path is request/response only |
+| Persist recordings | Do not add this lightly; the product promise is “audio stays in memory” |
+
+## Next
+
+[Speech-to-text](/speech-to-text) for the HTTP request that consumes this WAV.

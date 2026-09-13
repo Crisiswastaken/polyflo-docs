@@ -1,0 +1,89 @@
+---
+title: Contribute to Polyflo
+navTitle: Contributing
+description: How to report bugs, propose changes, and open pull requests against the Polyflo desktop app.
+---
+
+Polyflo is a small Tauri app. Most of the product lives in one Rust crate and two React entry points. You can audit it, fork it, or send a patch without a contributor agreement or a cloud account.
+
+<GitHub repo="Crisiswastaken/PolyFlo" title="Crisiswastaken/PolyFlo" description="Product source — Rust backend, React overlay/settings, Tauri bundling, and the release workflow." />
+
+This site documents that repository. The docs themselves live in a separate repo, [Crisiswastaken/polyflo-docs](https://github.com/Crisiswastaken/polyflo-docs).
+
+## What to work on
+
+Good first patches:
+
+- Dictation bugs (paste misses the focused field, overlay stuck, hotkey dead)
+- Settings bugs (API key save, hotkey capture, clipboard history)
+- Platform gaps (macOS Accessibility, Windows Credential Manager)
+- Docs that match the code (this site, the product README)
+
+Larger work that needs an issue first:
+
+- A new speech-to-text provider
+- Linux support
+- Offline recognition
+- Auto-punctuation / AI cleanup
+- Mobile
+
+<Note type="info" title="License">
+  The GitHub repository is public. Confirm the LICENSE file on the default branch before you redistribute a fork. If you are shipping a commercial derivative, do not assume rights that are not granted in writing.
+</Note>
+
+## Before you write code
+
+<Steps>
+  <Step title="Reproduce on current main">
+    Clone [PolyFlo](https://github.com/Crisiswastaken/PolyFlo), run [local development](/development), and confirm the bug or the missing path still exists.
+  </Step>
+  <Step title="Open or comment on an issue">
+    Use [GitHub Issues](https://github.com/Crisiswastaken/PolyFlo/issues) for bugs and design questions. Include OS, Polyflo version, and whether you built from source or used a release installer.
+  </Step>
+  <Step title="Keep the change small">
+    One problem per pull request. Match existing style: Rust modules under `src-tauri/src/`, React under `src/`, Tauri config in `src-tauri/tauri.conf.json`.
+  </Step>
+</Steps>
+
+## Pull request checklist
+
+- The hotkey still starts and stops a session.
+- Accidental taps under ~180 ms still do not hit Sarvam.
+- Settings still hides on close instead of destroying the window.
+- New Tauri commands are listed in [`permissions/app-commands.toml`](https://github.com/Crisiswastaken/PolyFlo/blob/main/src-tauri/permissions/app-commands.toml) **and** registered in `lib.rs`.
+- You did not commit `.env`, API keys, or `src-tauri/target/`.
+- `npm run typecheck` and `cargo test --manifest-path src-tauri/Cargo.toml` pass. See [Testing](/testing).
+
+## Code conventions
+
+| Area | Convention |
+| --- | --- |
+| Product name in UI and docs | **Polyflo** |
+| GitHub org/repo | `Crisiswastaken/PolyFlo` |
+| Dictation “as spoken” | Rust `DictationMode::Native`, frontend `"native"`, Settings label **Transcribe** |
+| Dictation “to English” | Rust `DictationMode::English`, frontend `"english"`, Settings label **Translate** |
+| STT | HTTP POST to `https://api.sarvam.ai/speech-to-text`, model `saaras:v3` — not WebSocket |
+| Errors to the UI | `events::emit_error` with a `code` + `message` |
+
+User-facing strings belong in the React UI. Backend `Err(String)` values are shown as notifications or Settings helper text — keep them short.
+
+## Docs contributions
+
+Product behavior belongs in this site (`polyflo-docs`). If you change how capture, STT, paste, or Settings work, update the matching page in the same PR or open a follow-up against [polyflo-docs](https://github.com/Crisiswastaken/polyflo-docs).
+
+## Next
+
+<CardGroup cols="2">
+  <Card title="Local development" icon="code-simple" href="/development">
+    Toolchain, `tauri:dev`, logging, and Windows MSVC pitfalls.
+  </Card>
+  <Card title="Repository layout" icon="folder" href="/repository-layout">
+    What each crate, window, and module is for.
+  </Card>
+  <Card title="Add a feature" icon="plus" href="/adding-features">
+    The checklist for a new command, event, or Settings control.
+  </Card>
+  <Card title="Fork and rebrand" icon="git-branch" href="/forking">
+    Identifier, icons, and swapping Sarvam for another STT API.
+  </Card>
+</CardGroup>

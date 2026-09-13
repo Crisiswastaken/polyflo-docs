@@ -1,0 +1,147 @@
+---
+title: Local development
+description: Install the toolchain, run Polyflo from source, and debug dictation sessions on Windows or macOS.
+---
+
+This page is the contributor path: a debug binary, hot reload, and logs. If you only want installers, use [Build from source](/build-from-source) or a [GitHub release](/quickstart).
+
+## Toolchain
+
+| Tool | Version | Why |
+| --- | --- | --- |
+| [Node.js](https://nodejs.org/) | 18+ (LTS is fine) | Vite + `@tauri-apps/cli` |
+| [Rust](https://www.rust-lang.org/tools/install) | 1.77+ stable | `src-tauri` crate |
+| [Tauri v2 OS deps](https://v2.tauri.app/start/prerequisites/) | current | WebView, linker, icons |
+
+<Tabs>
+  <Tab title="Windows">
+    - Visual Studio **Build Tools** or Community with **Desktop development with C++**
+    - Windows 10/11 SDK
+    - WebView2 (already on current Windows)
+    - Work in **PowerShell or CMD**. Git Bash puts GNU `link.exe` on `PATH` and MSVC builds fail. See `src-tauri/.cargo/config.toml`.
+    - Helper scripts: `scripts/setup-msvc.ps1`, `scripts/install-windows-sdk.ps1`, `scripts/run-dev.ps1`
+  </Tab>
+  <Tab title="macOS">
+    - Xcode Command Line Tools (`xcode-select --install`)
+    - Grant **Microphone** when the OS prompts
+    - Grant **Accessibility** for auto-paste (System Settings → Privacy & Security → Accessibility)
+  </Tab>
+</Tabs>
+
+## Clone and install
+
+```bash
+git clone https://github.com/Crisiswastaken/PolyFlo.git
+cd PolyFlo
+npm install
+```
+
+Optional `.env` in the repo root (gitignored). Copy from `.env.example`:
+
+```bash
+SARVAM_API_KEY=your_sarvam_api_key_here
+RUST_LOG=info,polyflo=debug
+```
+
+`SARVAM_API_KEY` is a **dev fallback**. `lib.rs` loads `.env` from the crate directory and the repo root via `dotenvy`. Release builds should use the OS keyring through Settings — see [Data and secrets](/data-and-secrets).
+
+## Run in development
+
+```bash
+npm run tauri:dev
+```
+
+What that command does:
+
+1. `beforeDevCommand` runs `npm run dev` — Vite on **port 1420** (`strictPort: true`).
+2. Tauri opens the **settings** and **overlay** windows against `http://localhost:1420`.
+3. Rust rebuilds when you change `src-tauri/`. Vite HMR covers `src/`.
+
+<Tabs>
+  <Tab title="Windows">
+    Prefer the helper if MSVC is not on your default `PATH`:
+
+    ```powershell
+    ./scripts/run-dev.ps1
+    ```
+
+    It imports `vcvars64.bat` and strips Git's `usr\bin` so `link.exe` is the MSVC linker.
+  </Tab>
+  <Tab title="macOS">
+    ```bash
+    npm run tauri:dev
+    ```
+
+    First dictation may prompt for microphone and Accessibility. Auto-paste stays off until Accessibility is granted — [Text injection](/injection).
+  </Tab>
+</Tabs>
+
+Success looks like: a tray icon, Settings if no API key is stored, and a 12×12 idle overlay near the bottom of the first monitor.
+
+## Useful scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run tauri:dev` | Debug app + Vite |
+| `npm run tauri:build` | Production installers in `src-tauri/target/release/bundle/` |
+| `npm run typecheck` | `tsc --noEmit` on the frontend |
+| `npm run build` | Frontend only (`tsc && vite build`) — Tauri runs this as `beforeBuildCommand` |
+| `cargo test --manifest-path src-tauri/Cargo.toml` | Rust unit tests |
+
+Vite ignores `src-tauri/**` in its watcher so Cargo and Vite do not fight.
+
+## Logging
+
+Rust uses `tracing` with `EnvFilter`. Default without `RUST_LOG` is `info`.
+
+```bash
+RUST_LOG=debug npm run tauri:dev
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:RUST_LOG = "info,polyflo=debug"
+npm run tauri:dev
+```
+
+Useful log lines:
+
+- `Ignoring accidental hotkey tap` — hold was under 180 ms or PCM under 5760 bytes
+- `Speech-to-text translate mode succeeded|failed` — Translate fallback path
+- `Pasted transcript (N chars)` vs `Transcript on clipboard`
+- `Failed to register hotkey`
+
+Frontend errors from `invoke` show in Settings (`loadError`) and in the WebView console.
+
+## Windows that exist at launch
+
+Both windows are declared in `src-tauri/tauri.conf.json` and created immediately:
+
+| Label | Default | Role |
+| --- | --- | --- |
+| `settings` | hidden, 420×680, not resizable | Mode, hotkey, API key, clipboard history |
+| `overlay` | hidden, 12×12, transparent, always-on-top, no focus | Waveform / spinner |
+
+Closing Settings **hides** the window (`CloseRequested` is intercepted in `lib.rs`). Do not `destroy()` it — v1.0.1 existed because the window could not reopen.
+
+## Common failures
+
+<AccordionGroup>
+  <Accordion title="error: linker `link.exe` not found">
+    You are in Git Bash, or MSVC is not installed. Use PowerShell, install the C++ workload, or run `scripts/run-dev.ps1`.
+  </Accordion>
+  <Accordion title="Port 1420 is already in use">
+    Vite is configured with `strictPort: true`. Stop the other process or the previous `tauri:dev`.
+  </Accordion>
+  <Accordion title="Settings stuck on Loading">
+    A command is missing from `permissions/app-commands.toml` or `capabilities/default.json`. Production builds enforce this; see v1.0.1 in the [changelog](/changelog).
+  </Accordion>
+  <Accordion title="Hotkey does nothing">
+    Missing API key now shows a notification. If the shortcut is taken by another app, change it in Settings. `get_hotkey_status` reports `registered`.
+  </Accordion>
+</AccordionGroup>
+
+## Next
+
+Read [Repository layout](/repository-layout), then [Session lifecycle](/session) for the hold-to-talk path.

@@ -1,0 +1,81 @@
+---
+title: Text injection
+description: How a transcript reaches the focused app — clipboard first, then simulated paste, with Windows focus restore and macOS Accessibility.
+---
+
+Injection always happens on a blocking thread (`spawn_blocking`) because `enigo` and clipboard APIs are synchronous.
+
+Source: [`inject/mod.rs`](https://github.com/Crisiswastaken/PolyFlo/blob/main/src-tauri/src/inject/mod.rs).
+
+## Order of operations
+
+<Steps>
+  <Step title="Restore the target window">
+    `focus::restore_target_window()`, then sleep 20 ms.
+  </Step>
+  <Step title="Write the clipboard">
+    `arboard` `set_text`. If this fails, injection is `Failed` — there is nothing to paste.
+  </Step>
+  <Step title="Decide if paste is allowed">
+    `platform::injection_reliable()` — Windows `true`; macOS `AXIsProcessTrusted()`.
+  </Step>
+  <Step title="Simulate paste or toast">
+    `enigo` sends the platform paste chord. On failure, show a notification: `Transcript copied — press Ctrl+V / Cmd+V to paste.`
+  </Step>
+</Steps>
+
+Results (`InjectionResult`):
+
+| Variant | Meaning |
+| --- | --- |
+| `Pasted` | Clipboard write + key simulation succeeded |
+| `ClipboardWithToast` | Text is on the clipboard; user must paste |
+| `Failed { reason }` | Clipboard write failed or empty text |
+
+History is still updated after `ClipboardWithToast`. Only a hard clipboard failure skips a usable transcript in the OS clipboard.
+
+## Paste chord
+
+[`paste.rs`](https://github.com/Crisiswastaken/PolyFlo/blob/main/src-tauri/src/inject/paste.rs): extra 30 ms sleep, then
+
+- macOS: `Meta` + `v`
+- elsewhere: `Control` + `v`
+
+There is no “type the characters” fallback. Apps that block paste (some games, some terminals, elevated windows) get the toast path if simulation errors.
+
+## Windows focus
+
+On **press**, `GetForegroundWindow` is stored as `isize`.
+
+On **inject**, if another window (the overlay/settings) stole focus, Polyflo:
+
+1. `AttachThreadInput` between the current foreground thread and the target
+2. `SetForegroundWindow` + `ShowWindow(SW_SHOW)`
+3. Detach threads
+
+This is why dictation can land in the editor you were in, not in Polyflo. macOS does not save an AXUIElement yet — Accessibility paste still usually works if the field kept focus (`overlay` is `focus: false`).
+
+## macOS Accessibility
+
+`injection_reliable()` calls `AXIsProcessTrusted()`. Settings exposes:
+
+- `check_accessibility_permission`
+- `request_accessibility_permission` — `open` the Accessibility pane via `x-apple.systempreferences:...Privacy_Accessibility`
+
+Without trust, Polyflo **does not attempt** enigo; it copies and notifies. That is intentional — failed paste plus a full clipboard overwrite is worse.
+
+`tauri-plugin-macos-permissions` is registered on macOS in `lib.rs` for related prompts.
+
+## Notifications
+
+`tauri-plugin-notification` toasts:
+
+- Missing API key on hotkey press
+- Clipboard-only fallback
+- (Errors also go to the `error` event for UI)
+
+## Fork notes
+
+- Linux would need a new `focus` path and a paste policy (many compositors block fake input).
+- Do not skip the clipboard write. It is the recovery path when paste is blocked.
+- If you change overlay to focusable, you **must** restore focus or paste will hit the overlay.

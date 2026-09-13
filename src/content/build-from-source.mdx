@@ -5,6 +5,8 @@ description: Clone Polyflo, install Node and Rust, then run the Tauri app in dev
 
 Use this path when you want to audit the code or produce your own installers. For daily use, prefer a [release installer](/quickstart).
 
+If you are contributing patches, start with [Contributing](/contributing) and [Local development](/development) — logging, MSVC, and the two-window debug flow live there.
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) 18 or later
@@ -62,4 +64,17 @@ GitHub Actions builds Windows and macOS installers and opens a **draft** release
 
 ## Next
 
-Read [Architecture](/architecture) for the capture → Sarvam → paste path.
+<CardGroup cols="2">
+  <Card title="Architecture" icon="code-simple" href="/architecture">
+    Capture → Sarvam → paste, then links into every internal module.
+  </Card>
+  <Card title="Local development" icon="wrench" href="/development">
+    Debug binary, RUST_LOG, and Windows linker pitfalls.
+  </Card>
+  <Card title="Testing" icon="check" href="/testing">
+    cargo test, typecheck, and a manual dictation pass.
+  </Card>
+  <Card title="Releases" icon="box" href="/releases">
+    Version tags, GitHub Actions matrix, draft installers.
+  </Card>
+</CardGroup>

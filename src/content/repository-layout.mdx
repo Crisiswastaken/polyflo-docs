@@ -1,0 +1,146 @@
+---
+title: Repository layout
+description: Map of the Polyflo GitHub repo — frontend entries, Rust modules, Tauri config, and CI.
+---
+
+The product identifier is `com.polyflo.app`. The crate name is `polyflo`; the library target is `polyflo_lib` so `main.rs` can call `polyflo_lib::run()`.
+
+<GitHub repo="Crisiswastaken/PolyFlo" title="Crisiswastaken/PolyFlo" />
+
+## Tree
+
+<Tree>
+  <Folder name="src" defaultOpen>
+    <File name="App.tsx" />
+    <File name="main.tsx" />
+    <File name="overlay-main.tsx" />
+    <File name="types.ts" />
+    <Folder name="components" defaultOpen>
+      <File name="Settings.tsx" />
+      <File name="Overlay.tsx" />
+      <File name="AudioWave.tsx" />
+      <File name="OverlayLoader.tsx" />
+    </Folder>
+    <Folder name="utils">
+      <File name="hotkey.ts" />
+      <File name="time.ts" />
+    </Folder>
+  </Folder>
+  <Folder name="src-tauri" defaultOpen>
+    <File name="Cargo.toml" />
+    <File name="tauri.conf.json" />
+    <File name="build.rs" />
+    <Folder name="src" defaultOpen>
+      <File name="lib.rs" />
+      <File name="main.rs" />
+      <File name="session.rs" />
+      <File name="hotkey.rs" />
+      <File name="commands.rs" />
+      <File name="config.rs" />
+      <File name="secrets.rs" />
+      <File name="history.rs" />
+      <File name="events.rs" />
+      <File name="tray.rs" />
+      <Folder name="audio">
+        <File name="capture.rs" />
+        <File name="resample.rs" />
+        <File name="wav.rs" />
+      </Folder>
+      <Folder name="stt">
+        <File name="sarvam.rs" />
+      </Folder>
+      <Folder name="translate">
+        <File name="sarvam.rs" />
+      </Folder>
+      <Folder name="inject">
+        <File name="mod.rs" />
+        <File name="clipboard.rs" />
+        <File name="paste.rs" />
+        <File name="focus.rs" />
+        <File name="platform.rs" />
+      </Folder>
+    </Folder>
+    <Folder name="capabilities">
+      <File name="default.json" />
+    </Folder>
+    <Folder name="permissions">
+      <File name="app-commands.toml" />
+    </Folder>
+    <Folder name="icons">
+      <File name="icon.ico" />
+      <File name="icon.icns" />
+    </Folder>
+  </Folder>
+  <Folder name="scripts">
+    <File name="run-dev.ps1" />
+    <File name="setup-msvc.ps1" />
+    <File name="install-windows-sdk.ps1" />
+  </Folder>
+  <Folder name=".github/workflows">
+    <File name="release.yml" />
+  </Folder>
+  <File name="index.html" />
+  <File name="overlay.html" />
+  <File name="vite.config.ts" />
+  <File name="package.json" />
+  <File name=".env.example" />
+</Tree>
+
+## Frontend (`src/`)
+
+Vite builds **two HTML entries** (`vite.config.ts`):
+
+| Entry | HTML | React mount | Window label |
+| --- | --- | --- | --- |
+| Settings | `index.html` → `src/main.tsx` → `App.tsx` | `<Settings />` | `settings` |
+| Overlay | `overlay.html` → `src/overlay-main.tsx` | `<Overlay />` | `overlay` |
+
+There is no router. Settings is a single panel. Overlay listens to `dictation-state` and `audio-level` only — it never calls STT.
+
+Shared TypeScript contracts live in `src/types.ts` and must stay aligned with the `#[serde(rename_all = "camelCase")]` structs in Rust.
+
+## Backend (`src-tauri/src/`)
+
+| Module | Responsibility |
+| --- | --- |
+| `lib.rs` | App bootstrap, plugins, `AppState`, window close behavior, command list |
+| `session.rs` | Idle → listening → processing → injecting state machine |
+| `hotkey.rs` | Global shortcut press/release → `SessionController` |
+| `audio/` | cpal capture thread, 16 kHz resample, WAV wrap |
+| `stt/sarvam.rs` | Multipart POST to Sarvam speech-to-text |
+| `translate/sarvam.rs` | Translate mode + LID + `sarvam-translate:v1` fallback |
+| `inject/` | Clipboard write, enigo paste, Windows focus restore, macOS trust check |
+| `commands.rs` | Tauri IPC used by Settings |
+| `config.rs` | `settings.json` |
+| `secrets.rs` | OS keyring + `SARVAM_API_KEY` |
+| `history.rs` | `history.json`, max 50 entries |
+| `events.rs` | `app.emit(...)` to both webviews |
+| `tray.rs` | Tray menu: Open Settings, Quit |
+
+## Config you will touch
+
+| File | When |
+| --- | --- |
+| `src-tauri/tauri.conf.json` | Windows, CSP, bundle targets, identifier, version |
+| `src-tauri/capabilities/default.json` | Which windows may call which plugins |
+| `src-tauri/permissions/app-commands.toml` | Allow-list of `invoke` command names |
+| `src-tauri/Cargo.toml` | Rust deps (`cpal`, `reqwest`, `enigo`, `keyring`, …) |
+| `package.json` | Frontend deps and npm scripts |
+| `.github/workflows/release.yml` | Tag-triggered installer matrix |
+
+## Version numbers
+
+Keep these in sync when you cut a release:
+
+- `package.json` `"version"`
+- `src-tauri/tauri.conf.json` `"version"`
+- `src-tauri/Cargo.toml` `version`
+
+CI does not bump them for you. See [Releases](/releases).
+
+## What is not in this repo
+
+- No server, database, or user accounts
+- No Linux target in the release matrix
+- No automated unit-test job on pull requests (run tests locally — [Testing](/testing))
+- Product docs are in [polyflo-docs](https://github.com/Crisiswastaken/polyflo-docs), not this tree

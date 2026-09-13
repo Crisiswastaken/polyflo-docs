@@ -1,0 +1,63 @@
+---
+title: Releases
+description: How Polyflo installers are built on GitHub Actions when you push a version tag.
+---
+
+Installers are **not** built on every commit. Pushing a tag matching `v*` runs [`.github/workflows/release.yml`](https://github.com/Crisiswastaken/PolyFlo/blob/main/.github/workflows/release.yml).
+
+## Version bump
+
+Update all three before tagging:
+
+- `package.json`
+- `src-tauri/tauri.conf.json`
+- `src-tauri/Cargo.toml`
+
+Then:
+
+```bash
+git tag v1.0.3
+git push origin v1.0.3
+```
+
+## Matrix
+
+`fail-fast: false` — one platform can fail without cancelling the others.
+
+| Runner | Target | Artifact style |
+| --- | --- | --- |
+| `macos-latest` | `aarch64-apple-darwin` | `.dmg` / `.app` Apple Silicon |
+| `macos-latest` | `x86_64-apple-darwin` | Intel Mac |
+| `windows-latest` | host | `Polyflo_*_x64-setup.exe` (NSIS) |
+
+Steps: checkout → Node LTS + npm cache → Rust stable → `rustup target add` on macOS → `npm ci` → `tauri-apps/tauri-action@v0`.
+
+## Draft release
+
+`tauri-action` is configured with:
+
+- `releaseDraft: true`
+- `prerelease: false`
+- `tagName` / `releaseName`: `Polyflo ${{ github.ref_name }}`
+- `permissions: contents: write` via `GITHUB_TOKEN`
+
+Open the draft on GitHub, replace the boilerplate notes (the workflow body still mentions v1.0.2 fixes — **edit it**), attach nothing extra if the action already uploaded artifacts, then publish.
+
+## What users download
+
+Documented on [Install](/quickstart):
+
+- Windows: `Polyflo_*_x64-setup.exe`
+- macOS arm64: `Polyflo_*_aarch64.dmg`
+- macOS x64: `Polyflo_*_x64.dmg`
+
+NSIS is `currentUser` — no admin required for a per-user install.
+
+## Signing
+
+The workflow does not pass Apple notarization or Windows signing secrets. Unsigned macOS builds will Gatekeeper-warn; unsigned Windows builds SmartScreen-warn. For a public fork, add signing as described in [Tauri distribute](https://v2.tauri.app/distribute/) and [Fork and rebrand](/forking).
+
+## After you publish
+
+- Add an `<Update>` on the [changelog](/changelog) page in `polyflo-docs`
+- Confirm the GitHub release notes do not still claim WebSocket STT

@@ -1,0 +1,80 @@
+---
+title: Fork and rebrand
+description: Ship your own dictation app from Polyflo — bundle id, icons, names, and a different speech-to-text API.
+---
+
+Forking is expected. Polyflo is a tray + hotkey + STT + paste pipeline. Keep that shape and replace the pieces that are yours.
+
+<Steps>
+  <Step title="Fork the product repo">
+    [Crisiswastaken/PolyFlo](https://github.com/Crisiswastaken/PolyFlo) — not the docs repo. Docs can stay pointing at upstream or you can copy `polyflo-docs`.
+  </Step>
+  <Step title="Change identity">
+    Update every identifier in the table below. A mismatched bundle id and keyring target will look like “API key not saving”.
+  </Step>
+  <Step title="Replace icons">
+    `src-tauri/icons/` plus `app-logo.png`. Regenerating with `npm run tauri icon path/to/1024.png` is the usual path.
+  </Step>
+  <Step title="Point STT at your vendor">
+    Keep `transcribe_pcm(...) -> Result<String, String>` as the session seam. See below.
+  </Step>
+  <Step title="Retarget CI">
+    `.github/workflows/release.yml` uses `GITHUB_TOKEN` and `tauri-action`. Update names, and add Apple/Windows signing secrets if you ship outside GitHub Actions unsigned builds.
+  </Step>
+</Steps>
+
+## Identity checklist
+
+| Location | Upstream value | Change to |
+| --- | --- | --- |
+| `tauri.conf.json` `productName` | `Polyflo` | Your app name |
+| `tauri.conf.json` `identifier` | `com.polyflo.app` | Reverse-DNS you control |
+| `tauri.conf.json` `version` | `1.0.2` | Start at `0.1.0` or keep history |
+| `Cargo.toml` `name` / `description` | `polyflo` | Your crate name |
+| `package.json` `name` | `polyflo` | npm package name |
+| `secrets.rs` `SERVICE` / `TARGET` | `polyflo`, `com.polyflo.app/sarvam-api-key` | Match the new identifier |
+| Tray / notification title | `"Polyflo"` | Your name |
+| CSP `connect-src` | `api.sarvam.ai` | Your STT origin if the webview will call it |
+| Release workflow `releaseName` | `Polyflo ${{ github.ref_name }}` | Your name |
+
+Windows installers are **current-user** NSIS (`installMode: currentUser`). macOS minimum is **10.15**. Bundle targets: `nsis`, `dmg`, `app`.
+
+## Swap speech-to-text
+
+Session only needs a `String` transcript. Minimal approach:
+
+1. Replace the body of `stt/sarvam.rs` (URL, headers, multipart fields, JSON parse).
+2. Decide what **Translate** means: drop `translate/sarvam.rs`, map English mode to your vendor’s translate flag, or call a second HTTP API.
+3. Update Settings copy that says “Sarvam”.
+4. Update this documentation set or unlink [Languages](/languages) if those 23 languages no longer apply.
+5. Keep `language_code` / model names out of `session.rs`.
+
+Do not send API keys to a proxy you do not document. Users who fork for privacy usually want the same “key stays on device until the STT POST” model.
+
+## Rebrand the overlay
+
+Overlay CSS lives with the sphere (`vox-sphere`). Sizes are **Rust-owned** (`overlay_size_for_state`). If you want a larger HUD, change `session.rs` and CSS together or the window will clip.
+
+## Linux
+
+Not in the release matrix. A fork would need:
+
+- cpal input on PipeWire/ALSA
+- a paste strategy (ydotool, portal, or clipboard-only)
+- a tray crate that works on your desktop
+- Tauri Linux deps from the [official prerequisites](https://v2.tauri.app/start/prerequisites/)
+
+Upstream `injection_reliable()` is `false` on non-Windows/non-macOS, so clipboard+toast would already be the default.
+
+## Signing and Gatekeeper
+
+GitHub Actions currently produces **unsigned** Windows and macOS artifacts (no `APPLE_*` / `TAURI_SIGNING` secrets in the workflow). Forks that ship to non-developers need Apple notarization and Windows Authenticode. [Tauri’s signing docs](https://v2.tauri.app/distribute/) are the authority — Polyflo does not wrap that yet.
+
+## Docs for your fork
+
+Either:
+
+- Keep linking to [polyflo.thally.app](https://polyflo.thally.app) for pipeline semantics, or
+- Fork [polyflo-docs](https://github.com/Crisiswastaken/polyflo-docs), change `docs.json` / `site.ts`, and publish your own Thally site
+
+Do not connect your **product** GitHub repo as a Thally docs source unless it contains `docs.json`.

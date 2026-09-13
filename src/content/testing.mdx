@@ -1,0 +1,82 @@
+---
+title: Testing and debugging
+navTitle: Testing
+description: Run frontend typechecks, Rust unit tests, and a manual dictation pass before you open a pull request.
+---
+
+There is no CI test job on pull requests. The [release workflow](/releases) only builds installers on tags. You are the test runner.
+
+## Automated
+
+```bash
+# TypeScript
+npm run typecheck
+
+# Rust unit tests (no Sarvam, no mic required)
+cargo test --manifest-path src-tauri/Cargo.toml
+```
+
+Current Rust tests:
+
+| Location | Asserts |
+| --- | --- |
+| `session.rs` | Distinct states; accidental press &lt; 180 ms or &lt; 5760 PCM bytes |
+| `audio/wav.rs` | RIFF/WAVE header and length |
+| `audio/resample.rs` | 48 kHz → ~16 k samples |
+
+Add tests next to the module you change. Keep them free of network and of real devices.
+
+Frontend: there is no Vitest suite in the product repo. `typecheck` is the gate.
+
+## Manual dictation pass
+
+Use `npm run tauri:dev` with a real key (Settings or `.env`).
+
+<Steps>
+  <Step title="First launch">
+    With keyring empty and no env var, Settings should appear by itself (`has_api_key` is false in `lib.rs` setup).
+  </Step>
+  <Step title="Save key">
+    Helper should read **Saved locally — verified**. Kill the process and reopen — `get_api_key_set` still true.
+  </Step>
+  <Step title="Transcribe">
+    Focus a text field, hold the hotkey &gt; 1 s, speak, release. Text pastes (or a paste toast appears). Overlay returns to idle.
+  </Step>
+  <Step title="Accidental tap">
+    Tap the hotkey. No spinner, no Sarvam charge. Log: `Ignoring accidental hotkey tap`.
+  </Step>
+  <Step title="Translate">
+    Switch mode, dictate a non-English phrase, expect English (or a `translate_error` toast).
+  </Step>
+  <Step title="Hotkey capture">
+    Change shortcut, confirm dictation uses the new combo, then hide Settings — shortcut still works.
+  </Step>
+  <Step title="History">
+    Settings clipboard list shows the new rows without a full reload (`clipboard-history-updated`).
+  </Step>
+</Steps>
+
+## Logging
+
+```bash
+RUST_LOG=info,polyflo=debug npm run tauri:dev
+```
+
+See [Local development](/development) for Windows PowerShell. Accidental taps, STT translate fallback, and paste vs clipboard are all `tracing` lines.
+
+## Production-only bugs
+
+Always smoke-test `npm run tauri:build` after IPC changes. Dev and release capability enforcement diverged once already ([changelog](/changelog) v1.0.1).
+
+Install the generated NSIS/DMG, confirm:
+
+- Settings loads
+- Key saves on Windows (Credential Manager)
+- Closing Settings does not quit the app (tray stays)
+
+## Mic and OS permissions
+
+- Windows: Settings → Privacy → Microphone
+- macOS: Microphone + Accessibility ([injection](/injection))
+
+`test_mic` is a 500 ms capture; it does not prove paste or STT.

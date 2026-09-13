@@ -1,0 +1,64 @@
+---
+title: Speech-to-text
+navTitle: STT and translation
+description: How Polyflo calls Sarvam Saaras v3 over HTTP, Transcribe vs Translate, and the text-translate fallback.
+---
+
+Polyflo does **not** open a WebSocket to Sarvam. The current backend posts a WAV blob to the REST speech-to-text API. Older README text that mentioned WebSocket STT is wrong.
+
+Sources: [`stt/sarvam.rs`](https://github.com/Crisiswastaken/PolyFlo/blob/main/src-tauri/src/stt/sarvam.rs), [`translate/sarvam.rs`](https://github.com/Crisiswastaken/PolyFlo/blob/main/src-tauri/src/translate/sarvam.rs).
+
+## Transcribe (Native mode)
+
+`transcribe_pcm(api_key, pcm, "transcribe")`:
+
+| Item | Value |
+| --- | --- |
+| URL | `https://api.sarvam.ai/speech-to-text` |
+| Method | `POST` multipart |
+| Header | `api-subscription-key: <key>` |
+| `file` | `recording.wav`, `audio/wav` |
+| `model` | `saaras:v3` |
+| `mode` | `transcribe` |
+| `language_code` | `unknown` (auto-detect / code-mix) |
+| Timeout | 60 s (`reqwest` client) |
+
+Success JSON is `{ "transcript": "..." }`. The string is trimmed.
+
+HTTP errors try to parse `{ "error": { "message": "..." } }` and surface that message to the overlay/session error event.
+
+`language_code=unknown` is why Indic and mixed speech work without a language picker. The [Languages](/languages) page lists Saaras v3 coverage.
+
+## Translate (English mode)
+
+`transcribe_to_english`:
+
+1. Call STT with `mode=translate`. If the transcript is non-empty, **return it**.
+2. If that fails or is empty, STT with `mode=transcribe`.
+3. `POST https://api.sarvam.ai/text-lid` with `{ "input": "<text>" }` → `language_code`.
+4. If the code is `en-IN`, skip translation.
+5. Else `POST https://api.sarvam.ai/translate` with model `sarvam-translate:v1`, target `en-IN`.
+
+Translate timeout is 30 s; LID is 15 s.
+
+Settings labels **Transcribe** / **Translate** map to Rust `DictationMode::Native` / `English` (`snake_case` on the wire: `"native"` / `"english"`).
+
+## Auth
+
+Every request uses the same key from [Data and secrets](/data-and-secrets). There is no OAuth, no Polyflo backend, and no key proxy.
+
+CSP in `tauri.conf.json` allows `https://api.sarvam.ai` (and a leftover `wss://api.sarvam.ai` from the old WebSocket plan). The Rust `reqwest` client does **not** go through the webview, so CSP does not apply to STT itself — it only matters if you add browser-side fetches.
+
+## Timeouts and size
+
+There is no explicit max recording duration in `SessionController`. The 60 s HTTP timeout is the practical ceiling for one utterance plus server time. Very long holds can produce large PCM buffers in RAM.
+
+## Swapping the provider
+
+Keep `transcribe_pcm(api_key, pcm, mode) -> Result<String, String>` as the seam. Session code should not know URLs.
+
+See [Fork and rebrand](/forking) for identifier/icon changes and a checklist for a new STT vendor.
+
+## Next
+
+[Text injection](/injection) for clipboard + paste after a transcript returns.

@@ -5,6 +5,8 @@ description: How Polyflo captures microphone audio, calls Sarvam, and pastes a t
 
 Polyflo is a [Tauri v2](https://v2.tauri.app/) desktop app: a small React UI (Settings + overlay) on a Rust backend. The product identifier is `com.polyflo.app`.
 
+This page is the map. Internals pages linked below are the source-level tour.
+
 ## Request path
 
 1. **Hotkey** — a global shortcut starts a session while held (`Ctrl+Shift+Space` / `Cmd+Shift+Space` by default).
@@ -18,6 +20,29 @@ Polyflo is a [Tauri v2](https://v2.tauri.app/) desktop app: a small React UI (Se
 
 Holds shorter than ~180 ms, or buffers under ~180 ms of audio, never reach the API.
 
+## Module map
+
+```
+hotkey.rs  →  session.rs  →  audio/capture.rs
+                    ↓
+              stt/sarvam.rs  (+ translate/sarvam.rs)
+                    ↓
+              inject/  (clipboard → paste → focus)
+                    ↓
+              history.rs  +  events.rs  →  overlay / settings
+```
+
+| Topic | Page |
+| --- | --- |
+| State machine, overlay size | [Session lifecycle](/session) |
+| cpal, resample, WAV | [Audio pipeline](/audio) |
+| HTTP STT and translate fallback | [Speech-to-text](/speech-to-text) |
+| Clipboard, enigo, Accessibility | [Text injection](/injection) |
+| React entries | [Frontend](/frontend) |
+| Commands and events | [IPC](/ipc) |
+| `settings.json`, keyring | [Data and secrets](/data-and-secrets) |
+| File tree | [Repository layout](/repository-layout) |
+
 ## Settings vs overlay
 
 | Window | Role |
@@ -29,7 +54,7 @@ Both windows are created at launch. Settings is hidden until you open it; the ov
 
 ## Secrets
 
-The Sarvam key lives in the OS credential manager (service `polyflo`, account `sarvam`). `SARVAM_API_KEY` is a development fallback. See [API key](/api-key).
+The Sarvam key lives in the OS credential manager (service `polyflo`, account `sarvam`). `SARVAM_API_KEY` is a development fallback. See [API key](/api-key) and [Data and secrets](/data-and-secrets).
 
 ## What this is not
 

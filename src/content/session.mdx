@@ -1,0 +1,88 @@
+---
+title: Session lifecycle
+description: Hold-to-talk state machine — idle, listening, processing, injecting — and what happens on press, release, and cancel.
+---
+
+Every dictation is one `SessionController` behind a `tokio::sync::Mutex` in `AppState`. The global hotkey is the only thing that starts or finalizes a session. Settings never starts capture.
+
+Source: [`src-tauri/src/session.rs`](https://github.com/Crisiswastaken/PolyFlo/blob/main/src-tauri/src/session.rs) and [`hotkey.rs`](https://github.com/Crisiswastaken/PolyFlo/blob/main/src-tauri/src/hotkey.rs).
+
+## States
+
+```
+Idle ──press──► Listening ──release──► Processing ──► Injecting ──► Idle
+                     │                      │
+                     └── accidental tap ────┴── errors also return to Idle
+```
+
+| `SessionState` | Overlay | Audio | Network |
+| --- | --- | --- | --- |
+| `Idle` | 12×12 hidden-looking dot | none | none |
+| `Listening` | 64×64 waveform | cpal thread running | none |
+| `Processing` | spinner | stopped, PCM drained | Sarvam STT (± translate) |
+| `Injecting` | spinner | none | none (clipboard + enigo) |
+
+`emit_dictation_state` sends `"idle" | "listening" | "processing" | "injecting"` to the webviews **and** resizes the overlay.
+
+## Press
+
+`hotkey.rs` handles `ShortcutState::Pressed` only when the controller is `Idle`:
+
+1. Reject if `secrets::get_api_key()` is empty — emit `session_start_failed` and a tray notification.
+2. `focus::capture_target_window()` — Windows stores the foreground HWND; macOS currently no-ops.
+3. `AudioCaptureGuard::start()` — dedicated capture thread because cpal `Stream` is `!Send`.
+4. Spawn a 16 ms loop that emits `audio-level` from `AudioBuffer::peak_level()`.
+5. Record `listen_started_at`.
+6. Emit `listening`.
+
+A second press while already listening is ignored (`start` returns `Ok(())` if not idle).
+
+## Release
+
+`ShortcutState::Released` while `Listening` calls `finalize()`:
+
+1. Stop the level task and drop `AudioCaptureGuard` (joins the capture thread).
+2. Drain PCM.
+3. If hold **&lt; 180 ms** **or** PCM **&lt; 5760 bytes** (~180 ms of 16 kHz 16-bit mono), treat as accidental — no API call, back to idle.
+4. Emit `processing`.
+5. Re-read `dictation_mode` from `AppState` (so a Settings change mid-hold still applies).
+6. **Native** → `stt::transcribe_pcm(..., "transcribe")`. **English** → `translate::transcribe_to_english`.
+7. Empty transcript → `empty_transcript` error, idle.
+8. Emit `injecting`, `spawn_blocking` → `inject::inject_text`.
+9. Append [history](/data-and-secrets) (even if paste fell back to clipboard).
+10. Reset: drop audio, clear saved HWND, emit `idle`.
+
+Release during `Processing` or `Injecting` is ignored so a bouncing key cannot cancel an in-flight request.
+
+## Overlay geometry
+
+| State | Logical size | Bottom margin |
+| --- | --- | --- |
+| idle | 12×12 | 80 px |
+| anything else | 64×64 | 56 px |
+
+Position is the **first** monitor from `available_monitors()`, horizontally centered, above the bottom edge. Multi-monitor “follow the focused display” is not implemented.
+
+The overlay window is `focus: false`, `skipTaskbar: true`, `alwaysOnTop: true`, transparent, no decorations. It must not steal keyboard focus from the target field.
+
+## Errors
+
+| Event `code` | When |
+| --- | --- |
+| `session_start_failed` | No API key or mic/capture failed on press |
+| `stt_error` | Sarvam speech-to-text failed |
+| `translate_error` | Translate path failed |
+| `empty_transcript` | API returned blank |
+| `paste_failed` | Clipboard write failed (inject `Failed`) |
+| `clipboard_failed` | Same path, emitted inside inject |
+| `session_finalize_failed` | `finalize()` returned `Err` (rare; most STT errors `Ok` after reset) |
+
+STT/translate failures call `reset_to_idle` and return `Ok(())` so the mutex is not left in `Listening`.
+
+## Tests in-tree
+
+`session.rs` has unit tests for state inequality and `is_accidental_press`. There is no integration test that talks to Sarvam. See [Testing](/testing).
+
+## Next
+
+[Audio pipeline](/audio) for capture details, then [Speech-to-text](/speech-to-text).

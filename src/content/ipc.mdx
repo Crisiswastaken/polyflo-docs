@@ -1,0 +1,78 @@
+---
+title: IPC and events
+navTitle: IPC
+description: Every Tauri command Settings can invoke, every event the backend emits, and the capability allow-list that must stay in sync.
+---
+
+Frontend talks to Rust with `invoke` (request/response) and `listen` (push). Commands are registered in `lib.rs` and **allow-listed** in `src-tauri/permissions/app-commands.toml`. Missing a name in that file is why Settings showed “Loading…” in production (v1.0.1).
+
+Capability `default` in `capabilities/default.json` applies to windows `settings` and `overlay`.
+
+## Commands
+
+| Command | Direction | Purpose |
+| --- | --- | --- |
+| `get_settings` | → `AppSettings` | Hotkey + mode from `settings.json` |
+| `save_settings` | `AppSettings` → `()` | Persist; re-register hotkey if it changed |
+| `get_api_key_set` | → `bool` | Whether a key exists (env or keyring) |
+| `get_api_key` | → `Option<String>` | Reveal in Settings |
+| `set_api_key` | `key: String` | Trim and store in keyring |
+| `clear_api_key` | → `()` | Delete keyring entry |
+| `get_clipboard_history` | → `HistoryEntry[]` | Newest first |
+| `test_mic` | → `bool` | 500 ms capture smoke test |
+| `get_hotkey_status` | → `{ registered, hotkey }` | |
+| `pause_hotkey` | → `()` | Unregister all shortcuts |
+| `resume_hotkey` | → `()` | Register current settings hotkey |
+| `get_platform_info` | → `PlatformInfo` | `os`, `injectionReliable`, `pasteModifier` |
+| `check_accessibility_permission` | macOS only | `AXIsProcessTrusted` |
+| `request_accessibility_permission` | macOS only | Open System Settings pane |
+
+`invoke` argument names are **camelCase** on the JS side (`{ settings }`, `{ key }`) matching `serde` / Tauri argument names.
+
+## Events
+
+Emitted from [`events.rs`](https://github.com/Crisiswastaken/PolyFlo/blob/main/src-tauri/src/events.rs) to **all** webviews.
+
+| Event | Payload | Listeners |
+| --- | --- | --- |
+| `dictation-state` | `"idle" \| "listening" \| "processing" \| "injecting"` | Overlay (required), optionally Settings |
+| `audio-level` | `number` 0..=1 | Overlay waveform |
+| `injection-result` | `{ method, success }` | unused in UI today; safe to hook |
+| `error` | `{ code, message }` | unused in Settings today; overlay does not show toasts |
+| `clipboard-history-updated` | `HistoryEntry` | Settings list |
+| `hotkey-status` | `{ registered, hotkey, error? }` | Settings |
+
+`dictation-state` also resizes/repositions the overlay window in Rust before the webview paints.
+
+## Plugins allowed
+
+From `capabilities/default.json`:
+
+- `core:default`, window show/hide/focus/position/monitors
+- `core:tray:default`
+- `global-shortcut:allow-register` / unregister / is-registered
+- `notification:default`
+- `allow-app-commands` (custom)
+
+If you add `tauri-plugin-fs` or HTTP from the webview, you need a new permission **and** a CSP update in `tauri.conf.json`.
+
+## CSP
+
+```
+default-src 'self';
+connect-src ipc: http://ipc.localhost https://api.sarvam.ai wss://api.sarvam.ai;
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+font-src 'self' https://fonts.gstatic.com
+```
+
+Rust `reqwest` bypasses CSP. Browser `fetch` to a new origin will not.
+
+## Adding a command
+
+1. `#[tauri::command]` in `commands.rs` (or a new module).
+2. Add to `tauri::generate_handler![...]` in `lib.rs`.
+3. Add the **exact** name to `commands.allow` in `app-commands.toml`.
+4. `invoke("your_command", { ... })` in React.
+5. Types in `src/types.ts`.
+
+Skip step 3 and production builds fail closed. See [Adding a feature](/adding-features).

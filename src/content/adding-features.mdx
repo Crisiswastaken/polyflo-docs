@@ -1,0 +1,75 @@
+---
+title: Add a feature
+description: Checklist for landing a new setting, Tauri command, event, or dictation behavior without breaking production IPC.
+---
+
+Polyflo’s failure mode is “Settings never loads” or “hotkey dead”, usually from a missed permission or a destroyed window. Walk this list in order.
+
+## 1. Decide where the work lives
+
+| Kind of change | Primary files |
+| --- | --- |
+| New Settings control | `src/components/Settings.tsx`, `src/types.ts`, `config.rs` |
+| New IPC | `commands.rs`, `lib.rs`, `app-commands.toml` |
+| Dictation behavior | `session.rs`, maybe `hotkey.rs` |
+| Audio format | `audio/*`, then STT multipart |
+| Overlay look | `Overlay.tsx` + CSS, **and** `resize_overlay_for_state` |
+| Tray menu item | `tray.rs` |
+
+Settings must not start recording. Overlay must not call STT.
+
+## 2. Persist only what you mean to
+
+- User prefs → `settings.json` via `AppSettings`
+- Secrets → `secrets.rs` / keyring, never JSON
+- Transcripts → `history.rs` (cap 50)
+- Ephemeral UI → React state
+
+Bump both Rust `AppSettings` and `src/types.ts`. Use `camelCase` on the wire.
+
+## 3. Command allow-list
+
+If Settings calls `invoke("foo")`:
+
+1. `#[tauri::command] pub fn foo ...`
+2. `generate_handler![..., foo]`
+3. `"foo"` in `src-tauri/permissions/app-commands.toml`
+4. No extra capability file unless you introduce a plugin
+
+Run a **production** `npm run tauri:build` once — `tauri:dev` is more forgiving and hid the v1.0.1 bug.
+
+## 4. Events
+
+Prefer an event when Rust is the source of truth (session state, audio meter, history). Prefer `invoke` when the UI initiates (save key, test mic).
+
+Payloads should be `serde_json` or a shared struct. Overlay already depends on `dictation-state` strings staying stable.
+
+## 5. Windows and focus
+
+- Do not `show()` the overlay in a way that focuses it (`tauri.conf.json` has `"focus": false`).
+- Do not destroy Settings on close.
+- If you add a third window, add its `label` to `capabilities/default.json` `windows`.
+
+## 6. Hotkey interactions
+
+Any UI that needs the physical keys (capture, a competing shortcut) must `pause_hotkey` and **always** `resume_hotkey` on success, cancel, timeout, and window hide.
+
+## 7. Platform gates
+
+Use `#[cfg(target_os = "macos")]` for Accessibility commands. The allow-list still includes those names so the TOML stays one file; they are only compiled on macOS.
+
+## 8. Verify
+
+From [Testing](/testing):
+
+```bash
+npm run typecheck
+cargo test --manifest-path src-tauri/Cargo.toml
+npm run tauri:dev
+```
+
+Manual: hold hotkey in Notepad/TextEdit, Transcribe and Translate, quit from tray, reopen Settings, confirm the key is still saved.
+
+## 9. Document
+
+Update the matching page on this site (session, STT, IPC, …) in [polyflo-docs](https://github.com/Crisiswastaken/polyflo-docs). Track is wired to open docs PRs when `Crisiswastaken/PolyFlo` merges — still write the human explanation yourself for non-obvious behavior.

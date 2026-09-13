@@ -76,3 +76,10 @@ Do not document Wispr Flow features as Polyflo features. Do not claim WebSocket
 STT; the app posts WAV audio to Sarvam's speech-to-text HTTP API using
 `saaras:v3`. The product repository is `Crisiswastaken/PolyFlo`. This
 documentation repository is `Crisiswastaken/polyflo-docs`.
+
+Contributor docs live under the Contribute tab. When internals change in the
+product repo, update the matching page (`session`, `audio`, `speech-to-text`,
+`injection`, `frontend`, `ipc`, `data-and-secrets`, `adding-features`) rather
+than stuffing everything into `architecture.mdx`. Keep Transcribe/Translate
+mapped to `native`/`english`. New Tauri commands must mention
+`permissions/app-commands.toml`.
