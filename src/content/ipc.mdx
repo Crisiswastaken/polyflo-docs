@@ -19,6 +19,8 @@ Capability `default` in `capabilities/default.json` applies to windows `settings
 | `set_api_key` | `key: String` | Trim and store in keyring |
 | `clear_api_key` | → `()` | Delete keyring entry |
 | `get_clipboard_history` | → `HistoryEntry[]` | Newest first |
+| `remove_clipboard_entry` | `id: String` → `()` | Delete one history entry by ID |
+| `clear_clipboard_history` | → `()` | Delete all history entries |
 | `test_mic` | → `bool` | 500 ms capture smoke test |
 | `get_hotkey_status` | → `{ registered, hotkey }` | |
 | `pause_hotkey` | → `()` | Unregister all shortcuts |
