@@ -1,6 +1,6 @@
 ---
 title: Settings
-description: Change dictation mode, the hold-to-talk hotkey, your API key, and reopen recent transcripts.
+description: Change dictation mode, the hold-to-talk hotkey, your API key, and manage recent transcripts.
 ---
 
 Settings is a small window, not a website. Open it from the tray / menu-bar icon → **Open Settings**. Quit the app from the same menu.
@@ -20,9 +20,11 @@ The choice is saved immediately. See [How dictation works](/dictation).
 
 - Click a row to open the full transcript.
 - Use the copy button on a row or in the modal to copy without dictating again.
+- Use the delete button on a row or in the modal to remove that single entry.
+- When at least one entry exists, a **Clear** button appears next to the section heading. It removes every entry at once and closes the transcript modal if it is open.
 - Empty state: **No transcripts yet**.
 
-History is local to this machine. It is not synced across devices.
+Removal and clearing persist immediately to `history.json`. History is local to this machine. It is not synced across devices.
 
 ## Hotkey
 
